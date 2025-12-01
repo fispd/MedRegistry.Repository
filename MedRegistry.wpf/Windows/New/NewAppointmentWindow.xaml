@@ -1,0 +1,52 @@
+﻿<Window x:Class="MedRegistryApp.wpf.Windows.NewAppointmentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MedRegistryApp.wpf.Windows"
+        mc:Ignorable="d"
+        Title="Новая запись" Width="400" Height="550"
+        WindowStartupLocation="CenterScreen" Background="#F0F2F5" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Border Background="White" CornerRadius="15" Padding="25">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" Direction="315" ShadowDepth="3" Opacity="0.15" BlurRadius="10"/>
+            </Border.Effect>
+            <StackPanel>
+                <!-- Заголовок -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                    <TextBlock Text="📅" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="Запись к врачу" FontSize="20" FontWeight="Bold" Foreground="#0B7FC7" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Врач -->
+                <TextBlock Text="Врач" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,0,0,5"/>
+                <ComboBox x:Name="DoctorComboBox" Height="35" SelectionChanged="DoctorComboBox_SelectionChanged"
+                          Padding="10,0" FontSize="13"/>
+
+                <!-- Дата -->
+                <TextBlock Text="Дата приёма" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,15,0,5"/>
+                <DatePicker x:Name="StartDatePicker" SelectedDateChanged="StartDatePicker_SelectedDateChanged" Height="35"
+                            FontSize="13"/>
+
+                <!-- Время -->
+                <TextBlock Text="Время" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,15,0,5"/>
+                <ComboBox x:Name="StartTimeComboBox" Height="35" SelectionChanged="StartTimeComboBox_SelectionChanged"
+                          Padding="10,0" FontSize="13"/>
+
+                <!-- Статус доступности -->
+                <TextBlock x:Name="AvailabilityTextBlock" Text="" Foreground="#E74C3C" FontSize="12" 
+                           Margin="0,8,0,0" FontWeight="SemiBold"/>
+
+                <!-- Цель приёма -->
+                <TextBlock Text="Цель приёма" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,15,0,5"/>
+                <ComboBox x:Name="PurposeComboBox" Height="35" Padding="10,0" FontSize="13"/>
+
+                <!-- Кнопка -->
+                <Button Content="✅ Записаться" Background="#27AE60" Foreground="White" 
+                        Margin="0,25,0,0" Height="42" FontSize="14" FontWeight="SemiBold"
+                        Click="Save_Click" Style="{StaticResource 2ButtonStyle}" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

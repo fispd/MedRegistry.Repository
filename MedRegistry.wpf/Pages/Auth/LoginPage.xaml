@@ -1,0 +1,103 @@
+<Page x:Class="MedRegistryApp.wpf.Pages.Auth.LoginPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:MedRegistryApp.wpf.Pages.Auth"
+      mc:Ignorable="d" 
+      d:DesignHeight="650" d:DesignWidth="1150"
+      Title="Вход в систему"
+      Background="#F0F2F5">
+
+    <Grid>
+        <Border Background="White" CornerRadius="15" Padding="40" 
+                Width="480" Height="480"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.15" Color="#000000"/>
+            </Border.Effect>
+            
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Регистратура клиники" 
+                           FontSize="22" 
+                           FontWeight="Bold" 
+                           Foreground="#2C3E50"
+                           Margin="0 0 0 5" 
+                           HorizontalAlignment="Center"/>
+                
+                <TextBlock Text="Вход в систему" 
+                           FontSize="14" 
+                           Foreground="#7F8C8D"
+                           Margin="0 0 0 30" 
+                           HorizontalAlignment="Center"/>
+
+                <!-- Логин -->
+                <TextBlock Text="Логин" 
+                           FontWeight="SemiBold" 
+                           Foreground="#2C3E50"
+                           Margin="0 0 0 5"/>
+                <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1">
+                    <TextBox x:Name="UsernameBox" 
+                             Height="40" 
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Padding="12 10"
+                             FontSize="14"
+                             VerticalContentAlignment="Center"/>
+                </Border>
+
+                <!-- Пароль -->
+                <TextBlock Text="Пароль" 
+                           FontWeight="SemiBold" 
+                           Foreground="#2C3E50"
+                           Margin="0 15 0 5"/>
+                <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1">
+                    <PasswordBox x:Name="PasswordBox" 
+                                 Height="40" 
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="12 10"
+                                 FontSize="14"
+                                 VerticalContentAlignment="Center"/>
+                </Border>
+
+                <!-- Кнопка Войти -->
+                <Button Content="Войти" 
+                        Height="45" 
+                        Margin="0 25 0 0" 
+                        Click="Login_Click" 
+                        x:Name="LoginButton" 
+                        Style="{StaticResource 2ButtonStyle}"
+                        FontSize="15"/>
+
+                <!-- Кнопка Регистрация -->
+                <Button Content="Создать аккаунт" 
+                        Height="45" 
+                        Margin="0 10 0 0" 
+                        Click="Register_Click" 
+                        Style="{StaticResource MenuButtonStyle}"
+                        FontSize="15"/>
+
+                <!-- Забыли пароль / Войти как гость -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 20 0 0">
+                    <TextBlock Text="Забыли пароль?" 
+                               FontSize="13" 
+                               Foreground="#3498DB"
+                               Cursor="Hand"
+                               TextDecorations="Underline"
+                               MouseLeftButtonDown="ForgotCredentials_Click"/>
+                    
+                    <TextBlock Text="  |  " Foreground="#E0E0E0" FontSize="13"/>
+                    
+                    <TextBlock Text="Войти как гость" 
+                               FontSize="13" 
+                               Foreground="#7F8C8D"
+                               Cursor="Hand"
+                               TextDecorations="Underline"
+                               MouseLeftButtonDown="GuestLogin_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>
+

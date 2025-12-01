@@ -1,0 +1,25 @@
+﻿<Page x:Class="MedRegistry.wpf.Pages.MedicalRecordsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:MedRegistry.wpf.Pages"
+      mc:Ignorable="d" 
+      Background="#F0F2F5"
+      Title="Медицинские отчёты">
+
+    <ScrollViewer>
+        <StackPanel Margin="20">
+            <!-- Заголовок -->
+            <TextBlock Text="Медицинские отчёты" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Foreground="#0B7FC7" 
+                       Margin="0,0,0,15"/>
+
+
+            <!-- Карточки отчётов -->
+            <WrapPanel x:Name="RecordsWrapPanel" HorizontalAlignment="Left"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,107 @@
+<Page x:Class="MedRegistryApp.wpf.Pages.Auth.RegisterPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:MedRegistryApp.wpf.Pages.Auth"
+      mc:Ignorable="d" 
+      d:DesignHeight="650" d:DesignWidth="1150"
+      Title="Регистрация — Шаг 1"
+      Background="#F0F2F5">
+
+    <Grid>
+        <Border Background="White" CornerRadius="15" Padding="25"
+                Width="420" 
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.15" Color="#000000"/>
+            </Border.Effect>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="600">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Заголовок -->
+                    <StackPanel Grid.Row="0" Margin="0 0 0 15">
+                        <TextBlock Text="Регистрация" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Foreground="#2C3E50"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Шаг 1 из 2 — Личные данные" 
+                                   FontSize="12" 
+                                   Foreground="#7F8C8D"
+                                   Margin="0 5 0 0"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Поля ввода -->
+                    <StackPanel Grid.Row="1">
+                        <!-- Фамилия -->
+                        <TextBlock Text="Фамилия *" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0 0 0 5"/>
+                        <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1" Margin="0 0 0 10">
+                            <TextBox x:Name="LastNameBox" Height="36" BorderThickness="0" Background="Transparent" Padding="12 8" FontSize="14" VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <!-- Имя -->
+                        <TextBlock Text="Имя *" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0 0 0 5"/>
+                        <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1" Margin="0 0 0 10">
+                            <TextBox x:Name="FirstNameBox" Height="36" BorderThickness="0" Background="Transparent" Padding="12 8" FontSize="14" VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <!-- Отчество -->
+                        <TextBlock Text="Отчество" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0 0 0 5"/>
+                        <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1" Margin="0 0 0 10">
+                            <TextBox x:Name="MiddleNameBox" Height="36" BorderThickness="0" Background="Transparent" Padding="12 8" FontSize="14" VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <!-- Телефон -->
+                        <TextBlock Text="Телефон *" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0 0 0 5"/>
+                        <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1" Margin="0 0 0 10">
+                            <TextBox x:Name="PhoneBox" Height="36" BorderThickness="0" Background="Transparent" Padding="12 8" FontSize="14" VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <!-- Email -->
+                        <TextBlock Text="Email *" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0 0 0 5"/>
+                        <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1" Margin="0 0 0 10">
+                            <TextBox x:Name="EmailBox" Height="36" BorderThickness="0" Background="Transparent" Padding="12 8" FontSize="14" VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <!-- Адрес -->
+                        <TextBlock Text="Адрес проживания *" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0 0 0 5"/>
+                        <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1" Margin="0 0 0 10">
+                            <TextBox x:Name="AddressBox" Height="36" BorderThickness="0" Background="Transparent" Padding="12 8" FontSize="14" VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <!-- Полис -->
+                        <TextBlock Text="Медицинский полис *" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0 0 0 5"/>
+                        <Border Background="#F8F9FA" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1">
+                            <TextBox x:Name="PolicyBox" Height="36" BorderThickness="0" Background="Transparent" Padding="12 8" FontSize="14" VerticalContentAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Кнопки -->
+                    <StackPanel Grid.Row="2" Margin="0 15 0 0">
+                        <Button Content="Далее →" 
+                                Height="42" 
+                                Click="Next_Click" 
+                                Style="{StaticResource 2ButtonStyle}"
+                                FontSize="15"/>
+                        <Button Content="← Назад к входу" 
+                                Height="42" 
+                                Margin="0 10 0 0"
+                                Click="Back_Click" 
+                                Style="{StaticResource MenuButtonStyle}"
+                                FontSize="15"/>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Page>
+
+

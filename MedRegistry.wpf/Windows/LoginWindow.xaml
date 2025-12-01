@@ -1,0 +1,32 @@
+﻿<Window x:Class="MedRegistryApp.wpf.Windows.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MedRegistryApp.wpf.Windows"
+        mc:Ignorable="d"
+        Title="Регистратура клиники"
+        Width="400" Height="450"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F0F2F5">
+
+    <Grid Margin="20">
+        <Border Background="White" CornerRadius="10" Padding="20" >
+            <StackPanel>
+                <TextBlock Text="Электронная регистратура" FontSize="18" FontWeight="Bold" Margin="0 0 0 10" HorizontalAlignment="Center"/>
+                <TextBlock Text="Вход в систему" FontSize="14" Margin="0 0 0 20" HorizontalAlignment="Center"/>
+
+                <TextBlock Text="Логин" FontWeight="SemiBold"/>
+                <TextBox x:Name="UsernameBox" Height="30" Margin="0 5"/>
+
+                <TextBlock Text="Пароль" FontWeight="SemiBold" Margin="0 10 0 0"/>
+                <PasswordBox x:Name="PasswordBox" Height="30" Margin="0 5"/>
+
+                <Button Content="Войти" Height="35" Background="#0B7FC7" Foreground="White" Margin="0 20 0 0" Click="Login_Click" x:Name="LoginButton" Style="{StaticResource 2ButtonStyle}"/>
+
+                <Button Content="Регистрация" Height="35" Background="Gray" Foreground="White" Margin="0 10 0 0" Click="Register_Click" Style="{StaticResource MenuButtonStyle}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

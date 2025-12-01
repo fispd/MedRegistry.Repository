@@ -1,0 +1,38 @@
+﻿<Window x:Class="MedRegistryApp.wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MedRegistryApp.wpf"
+        mc:Ignorable="d"
+        Title="Регистратура клиники" Width="1200" Height="700"
+        WindowStartupLocation="CenterScreen" Background="#F0F2F5">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Background="White" Grid.Column="0">
+
+            <TextBlock Text="Регистратура клиники" FontWeight="Bold" FontSize="16" Margin="10"/>
+            <Button Content="👤 Профиль" Style="{StaticResource MenuButtonStyle}" Click="ProfileButton_Click" x:Name="ProfileButton"/>
+            <Button Content="📅 Записаться на приём" Style="{StaticResource MenuButtonStyle}" Click="NewAppointment_Click" x:Name="NewAppointment"/>
+            <Button Content="👨‍⚕️ Врачи" Style="{StaticResource MenuButtonStyle}" Click="DoctorsButton_Click" x:Name="DoctorsButton"/>
+            <Button Content="📋 Расписание" Style="{StaticResource MenuButtonStyle}" Click="ScheduleButton_Click" x:Name="ScheduleButton"/>
+            <Button Content="🎫 Талоны" Style="{StaticResource MenuButtonStyle}" Click="AppointmentsButton_Click" x:Name="AppointmentsButton"/>
+            <Button Content="📄 Отчёты" Style="{StaticResource MenuButtonStyle}" Click="ReportsButton_Click" x:Name="ReportsButton"/>
+            <Button Content="👥 Пользователи" Style="{StaticResource MenuButtonStyle}" Click="UsersButton_Click" x:Name="UserButton"/>
+
+
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Background="White" Height="70" VerticalAlignment="Bottom">
+            <Button Content="🚪 Выход" Margin="10" Click="LogoutButton_Click" Style="{StaticResource MenuButtonStyle}"/>
+        </StackPanel>
+
+        <!-- Основной контент -->
+        <Frame x:Name="MainFrame" Grid.Column="1" NavigationUIVisibility="Hidden"/>
+    </Grid>
+</Window>

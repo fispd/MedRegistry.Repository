@@ -1,0 +1,73 @@
+﻿<Window x:Class="MedRegistryApp.wpf.Windows.NewDoctorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MedRegistryApp.wpf.Windows"
+        mc:Ignorable="d"
+        Title="Новый врач" Width="420" Height="600"
+        WindowStartupLocation="CenterScreen" Background="#F0F2F5" ResizeMode="NoResize">
+
+    <Grid Margin="20">
+        <Border Background="White" CornerRadius="15" Padding="25">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" Direction="315" ShadowDepth="3" Opacity="0.15" BlurRadius="10"/>
+            </Border.Effect>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Заголовок -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <TextBlock Text="👨‍⚕️" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="Добавить врача" FontSize="20" FontWeight="Bold" Foreground="#0B7FC7" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Фамилия -->
+                    <TextBlock Text="Фамилия" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,0,0,5"/>
+                    <TextBox x:Name="LastNameBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Имя -->
+                    <TextBlock Text="Имя" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <TextBox x:Name="FirstNameBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Отчество -->
+                    <TextBlock Text="Отчество" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <TextBox x:Name="MiddleNameBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Телефон -->
+                    <TextBlock Text="Телефон" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <TextBox x:Name="PhoneBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Email -->
+                    <TextBlock Text="Email" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <TextBox x:Name="EmailBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Адрес -->
+                    <TextBlock Text="Адрес" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <TextBox x:Name="AddressBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Полис -->
+                    <TextBlock Text="Медицинский полис" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <TextBox x:Name="PolicyBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Специализация -->
+                    <TextBlock Text="Специализация" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <ComboBox x:Name="SpecializationComboBox" Height="35" Padding="10,0" FontSize="13"/>
+                    <Button Content="➕ Добавить новую специализацию" Height="32"
+                            Margin="0,8,0,0" Click="AddSpecialization_Click" FontSize="12"
+                            Background="#9B59B6" Foreground="White" 
+                            Style="{StaticResource 2ButtonStyle}" Cursor="Hand"/>
+
+                    <!-- Кабинет -->
+                    <TextBlock Text="Кабинет" FontWeight="SemiBold" FontSize="13" Foreground="#555" Margin="0,12,0,5"/>
+                    <TextBox x:Name="CabinetBox" Height="35" Padding="10,0" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Кнопка сохранения -->
+                    <Button Content="💾 Сохранить врача" Background="#27AE60"
+                            Foreground="White" Margin="0,25,0,0"
+                            Height="45" Click="Save_Click" FontSize="14" FontWeight="SemiBold"
+                            Style="{StaticResource 2ButtonStyle}" Cursor="Hand"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>

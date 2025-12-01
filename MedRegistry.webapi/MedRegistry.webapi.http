@@ -1,0 +1,6 @@
+@MedRegistry.webapi_HostAddress = http://localhost:5235
+
+GET {{MedRegistry.webapi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
