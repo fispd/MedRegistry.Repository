@@ -77,7 +77,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Фильтр по врачу -->
-                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                        <StackPanel x:Name="DoctorFilterPanel" Grid.Column="0" Margin="0,0,15,0">
                             <TextBlock Text="Врач:" FontWeight="Bold" FontSize="13" Margin="0,0,0,5"/>
                             <ComboBox x:Name="DoctorFilter"
                                       Height="32"

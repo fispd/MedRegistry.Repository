@@ -12,67 +12,103 @@ using DataLayer.Data;
 using MedRegistry.wpf.Pages;
 using DataLayer.Models;
 using MedRegistry.wpf.Windows.Edit;
+using System;
+using System.Collections.Generic;
 
 namespace MedRegistryApp.wpf.Pages
 {
     /// <summary>
-    /// Логика взаимодействия для AppointmentsPage.xaml
+    /// Страница управления записями на приём (талонами).
+    /// Отображает записи в зависимости от роли пользователя.
     /// </summary>
     public partial class AppointmentsPage : Page
     {
         private int _userId;
         private string _role;
 
+        /// <summary>
+        /// Конструктор страницы записей на приём.
+        /// </summary>
+        /// <param name="userId">ID текущего пользователя</param>
+        /// <param name="role">Роль пользователя</param>
         public AppointmentsPage(int userId, string role)
         {
             InitializeComponent();
             _userId = userId;
             _role = role;
             
+            ConfigureButtonVisibility();
+            LoadAppointments();
+        }
+
+        /// <summary>
+        /// Настраивает видимость кнопок в зависимости от роли.
+        /// </summary>
+        private void ConfigureButtonVisibility()
+        {
             var addButton = this.FindName("AddAppointmentButton") as Button;
             if (addButton != null && (_role == "Пациент" || _role == "Врач"))
             {
                 addButton.Visibility = Visibility.Collapsed;
             }
-            
-            LoadAppointments();
         }
 
+        /// <summary>
+        /// Загружает записи на приём из базы данных.
+        /// Фильтрует по роли: пациент видит свои записи, врач - свои приёмы на сегодня.
+        /// </summary>
         private void LoadAppointments()
         {
-            using var db = new MedRegistryContext();
+            try
+            {
+                using var db = new MedRegistryContext();
 
-            IQueryable<Appointment> query = db.Appointments
-                .Include(a => a.Patient).ThenInclude(p => p.User)
-                .Include(a => a.Doctor).ThenInclude(d => d.User);
+                IQueryable<Appointment> query = db.Appointments
+                    .Include(a => a.Patient).ThenInclude(p => p.User)
+                    .Include(a => a.Doctor).ThenInclude(d => d.User);
 
-            if (_role == "Пациент")
-            {
-                query = query.Where(a => a.Patient.UserId == _userId);
-            }
-            else if (_role == "Врач")
-            {
-                query = query.Where(a => a.Doctor.UserId == _userId);
-            }
+                // Фильтрация по роли
+                if (_role == "Пациент")
+                {
+                    query = query.Where(a => a.Patient.UserId == _userId);
+                }
+                else if (_role == "Врач")
+                {
+                    // Врач видит только свои приёмы на сегодня
+                    var today = DateTime.Today;
+                    query = query.Where(a => a.Doctor.UserId == _userId && 
+                                            a.AppointmentStart.Date == today);
+                }
 
-            List<Appointment> appointments;
-            
-            // Для пациентов сортируем так, чтобы отмененные и выполненные записи были внизу
-            if (_role == "Пациент")
-            {
-                appointments = query.OrderBy(a => 
-                    (a.Status == "Отменено" || a.Status == "Выполнено") ? 1 : 0)
-                    .ThenBy(a => a.AppointmentStart)
-                    .ToList();
+                // Сортировка: активные записи сначала, завершённые/отменённые внизу
+                List<Appointment> appointments;
+                
+                if (_role == "Пациент" || _role == "Врач")
+                {
+                    // Для пациента и врача: активные записи сверху, завершённые/отменённые внизу
+                    appointments = query
+                        .OrderBy(a => (a.Status == "Отменено" || a.Status == "Выполнено") ? 1 : 0)
+                        .ThenBy(a => a.AppointmentStart)
+                        .ToList();
+                }
+                else
+                {
+                    appointments = query.OrderBy(a => a.AppointmentStart).ToList();
+                }
+                
+                DisplayAppointments(appointments);
             }
-            else
+            catch (Exception ex)
             {
-                appointments = query.OrderBy(a => a.AppointmentStart).ToList();
+                MessageBox.Show($"Ошибка при загрузке записей: {ex.Message}", 
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            
-            DisplayAppointments(appointments);
         }
 
+        /// <summary>
+        /// Отображает карточки записей на приём.
+        /// </summary>
+        /// <param name="appointments">Список записей для отображения</param>
         private void DisplayAppointments(List<Appointment> appointments)
         {
             AppointmentsWrapPanel.Children.Clear();
@@ -83,254 +119,352 @@ namespace MedRegistryApp.wpf.Pages
                 return;
             }
 
-            foreach (var a in appointments)
+            foreach (var appointment in appointments)
             {
-                double cardWidth = 290;
-                double cardHeight = 260;
-                
-                if (_role == "Администратор")
-                {
-                    cardHeight = 300;
-                }
-                else if (_role == "Регистратор")
-                {
-                    cardHeight = 220;
-                }
-                else if (_role == "Врач")
-                {
-                    cardHeight = 310;
-                }
-                else if (_role == "Пациент")
-                {
-                    cardHeight = 220;
-                }
-
-                var border = new Border
-                {
-                    Background = Brushes.White,
-                    CornerRadius = new CornerRadius(12),
-                    Margin = new Thickness(8),
-                    Padding = new Thickness(12),
-                    Width = cardWidth,
-                    MinHeight = cardHeight,
-                    MaxWidth = cardWidth,
-                    BorderBrush = new SolidColorBrush(Color.FromRgb(230, 230, 230)),
-                    BorderThickness = new Thickness(1),
-                    Effect = new DropShadowEffect
-                    {
-                        Color = Colors.Gray,
-                        Direction = 315,
-                        ShadowDepth = 3,
-                        Opacity = 0.3,
-                        BlurRadius = 5
-                    }
-                };
-
-                var sp = new StackPanel();
-
-                var headerText = new TextBlock
-                {
-                    Text = $"📅 {a.AppointmentStart:dd.MM.yyyy} в {a.AppointmentStart:HH:mm}",
-                    FontSize = 13,
-                    FontWeight = FontWeights.Bold,
-                    Foreground = new SolidColorBrush(Color.FromRgb(11, 127, 199)),
-                    Margin = new Thickness(0, 0, 0, 8)
-                };
-                sp.Children.Add(headerText);
-
-                if (_role == "Пациент")
-                {
-                    sp.Children.Add(CreateInfoTextBlock("👨‍⚕️ Врач", $"{a.Doctor?.User?.LastName} {a.Doctor?.User?.FirstName} {a.Doctor?.User?.MiddleName}"));
-                }
-                else if (_role == "Врач")
-                {
-                    sp.Children.Add(CreateInfoTextBlock("👤 Пациент", $"{a.Patient?.User?.LastName} {a.Patient?.User?.FirstName} {a.Patient?.User?.MiddleName}"));
-                }
-                else if (_role == "Регистратор" || _role == "Администратор")
-                {
-                    sp.Children.Add(CreateInfoTextBlock("👨‍⚕️ Врач", $"{a.Doctor?.User?.LastName} {a.Doctor?.User?.FirstName}"));
-                    sp.Children.Add(CreateInfoTextBlock("👤 Пациент", $"{a.Patient?.User?.LastName} {a.Patient?.User?.FirstName}"));
-                }
-
-                sp.Children.Add(CreateInfoTextBlock("🏥 Кабинет", a.Doctor?.CabinetNumber?.ToString() ?? "—"));
-                sp.Children.Add(CreateInfoTextBlock("⏰ Время", $"{a.AppointmentStart:HH:mm} - {a.AppointmentEnd:HH:mm}"));
-                sp.Children.Add(CreateInfoTextBlock("📝 Причина", a.Purpose ?? "—"));
-                
-                // Статус не отображаем для пациентов
-                if (_role != "Пациент")
-                {
-                    var statusColor = GetStatusColor(a.Status ?? "Ожидает");
-                    var statusText = new TextBlock
-                    {
-                        Text = $"Статус: {a.Status ?? "Ожидает"}",
-                        FontSize = 11,
-                        FontWeight = FontWeights.SemiBold,
-                        Foreground = statusColor,
-                        Margin = new Thickness(0, 5, 0, 8)
-                    };
-                    sp.Children.Add(statusText);
-                }
-
-                var btnPanel = new WrapPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    Margin = new Thickness(0, 4, 0, 0),
-                    HorizontalAlignment = HorizontalAlignment.Left
-                };
-
-                var editBtn = new Button
-                {
-                    Content = "✏️ Изменить",
-                    Style = (Style)Application.Current.Resources["EditButtonStyle"]
-                };
-                editBtn.Click += (s, e) =>
-                {
-                    var editWindow = new EditAppointmentWindow(a.AppointmentId);
-                    editWindow.ShowDialog();
-                    LoadAppointments();
-                };
-
-                var cancelBtn = new Button
-                {
-                    Content = "❌ Отменить",
-                    Style = (Style)Application.Current.Resources["CancelButtonStyle"]
-                };
-                cancelBtn.Click += (s, e) =>
-                {
-                    var result = MessageBox.Show("Вы уверены, что хотите отменить запись?", 
-                        "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        UpdateAppointmentStatus(a.AppointmentId, "Отменено");
-                    }
-                };
-
-                var reportBtn = new Button
-                {
-                    Content = "📄 Отчёт",
-                    Style = (Style)Application.Current.Resources["ReportButtonStyle"]
-                };
-                reportBtn.Click += (s, e) =>
-                {
-                    this.NavigationService?.Navigate(
-                        new NewMedicalRecordPage(a.AppointmentId, a.PatientId, a.DoctorId)
-                    );
-                };
-
-                var doneBtn = new Button
-                {
-                    Content = "✅ Выполнено",
-                    Style = (Style)Application.Current.Resources["DoneButtonStyle"]
-                };
-                doneBtn.Click += (s, e) =>
-                {
-                    UpdateAppointmentStatus(a.AppointmentId, "Выполнено");
-                };
-
-                var moveBtn = new Button
-                {
-                    Content = "🔄 Перенести",
-                    Style = (Style)Application.Current.Resources["MoveButtonStyle"]
-                };
-                moveBtn.Click += (s, e) =>
-                {
-                    var win = new MoveAppointmentWindow(a.AppointmentId);
-                    if (win.ShowDialog() == true)
-                        LoadAppointments();
-                };
-
-                var repeatBtn = new Button
-                {
-                    Content = "🔁 Повторный",
-                    Style = (Style)Application.Current.Resources["EditButtonStyle"]
-                };
-                repeatBtn.Click += (s, ev) =>
-                {
-                    using var dbDoc = new MedRegistryContext();
-                    var doctor = dbDoc.Doctors.FirstOrDefault(d => d.UserId == _userId);
-                    if (doctor != null)
-                    {
-                        var repeatWindow = new RepeatAppointmentWindow(a.PatientId, doctor.DoctorId);
-                        if (repeatWindow.ShowDialog() == true)
-                        {
-                            LoadAppointments();
-                        }
-                    }
-                };
-
-                var patientDocsBtn = new Button
-                {
-                    Content = "📋 Документы",
-                    Style = (Style)Application.Current.Resources["ReportButtonStyle"]
-                };
-                patientDocsBtn.Click += (s, e) =>
-                {
-                    this.NavigationService?.Navigate(
-                        new MedicalRecordsPage(_userId, _role, a.PatientId)
-                    );
-                };
-
-                if (_role == "Пациент")
-                {
-                    // Скрываем кнопки, если запись отменена или выполнена
-                    bool isCompletedOrCancelled = (a.Status == "Отменено" || a.Status == "Выполнено");
-                    
-                    if (!isCompletedOrCancelled)
-                    {
-                        btnPanel.Children.Add(moveBtn);
-                        btnPanel.Children.Add(cancelBtn);
-                    }
-                    else
-                    {
-                        // Если запись отменена или выполнена, добавляем информационный текст вместо кнопок
-                        var infoText = new TextBlock
-                        {
-                            Text = a.Status == "Отменено" 
-                                ? "❌ Запись отменена" 
-                                : "✅ Запись выполнена",
-                            FontSize = 12,
-                            FontWeight = FontWeights.SemiBold,
-                            Foreground = a.Status == "Отменено" 
-                                ? new SolidColorBrush(Color.FromRgb(231, 76, 60))
-                                : new SolidColorBrush(Color.FromRgb(39, 174, 96)),
-                            Margin = new Thickness(0, 5, 0, 0),
-                            HorizontalAlignment = HorizontalAlignment.Center
-                        };
-                        btnPanel.Children.Add(infoText);
-                    }
-                    
-                    // Делаем карточку более блеклой, если запись отменена или выполнена
-                    if (isCompletedOrCancelled)
-                    {
-                        border.Background = new SolidColorBrush(Color.FromArgb(230, 245, 245, 245)); // Светло-серый фон
-                        border.Opacity = 0.75; // Немного прозрачная
-                    }
-                }
-                else if (_role == "Врач")
-                {
-                    btnPanel.Children.Add(reportBtn);
-                    btnPanel.Children.Add(patientDocsBtn);
-                    btnPanel.Children.Add(repeatBtn);
-                    btnPanel.Children.Add(doneBtn);
-                }
-                else if (_role == "Регистратор")
-                {
-                }
-                else if (_role == "Администратор")
-                {
-                    btnPanel.Children.Add(moveBtn);
-                    btnPanel.Children.Add(editBtn);
-                    btnPanel.Children.Add(cancelBtn);
-                    btnPanel.Children.Add(reportBtn);
-                    btnPanel.Children.Add(doneBtn);
-                }
-
-                sp.Children.Add(btnPanel);
-                border.Child = sp;
-                AppointmentsWrapPanel.Children.Add(border);
+                var card = CreateAppointmentCard(appointment);
+                AppointmentsWrapPanel.Children.Add(card);
             }
         }
 
+        /// <summary>
+        /// Создаёт визуальную карточку записи на приём.
+        /// </summary>
+        /// <param name="appointment">Данные записи</param>
+        /// <returns>Border элемент с карточкой</returns>
+        private Border CreateAppointmentCard(Appointment appointment)
+        {
+            double cardHeight = GetCardHeight();
+            bool isCompletedOrCancelled = appointment.Status == "Отменено" || appointment.Status == "Выполнено";
+            // Блеклые карточки для завершённых записей у пациента и врача
+            bool shouldFade = isCompletedOrCancelled && (_role == "Пациент" || _role == "Врач");
+
+            var border = new Border
+            {
+                Background = shouldFade 
+                    ? new SolidColorBrush(Color.FromArgb(230, 245, 245, 245)) 
+                    : Brushes.White,
+                CornerRadius = new CornerRadius(12),
+                Margin = new Thickness(8),
+                Padding = new Thickness(12),
+                Width = 290,
+                MinHeight = cardHeight,
+                MaxWidth = 290,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(230, 230, 230)),
+                BorderThickness = new Thickness(1),
+                Opacity = shouldFade ? 0.75 : 1,
+                Effect = new DropShadowEffect
+                {
+                    Color = Colors.Gray,
+                    Direction = 315,
+                    ShadowDepth = 3,
+                    Opacity = 0.3,
+                    BlurRadius = 5
+                }
+            };
+
+            var sp = new StackPanel();
+
+            // Заголовок с датой и временем
+            sp.Children.Add(new TextBlock
+            {
+                Text = $"📅 {appointment.AppointmentStart:dd.MM.yyyy} в {appointment.AppointmentStart:HH:mm}",
+                FontSize = 13,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(11, 127, 199)),
+                Margin = new Thickness(0, 0, 0, 8)
+            });
+
+            // Информация о враче/пациенте в зависимости от роли
+            AddRoleSpecificInfo(sp, appointment);
+
+            // Общая информация
+            sp.Children.Add(CreateInfoTextBlock("🏥 Кабинет", appointment.Doctor?.CabinetNumber ?? "—"));
+            sp.Children.Add(CreateInfoTextBlock("⏰ Время", $"{appointment.AppointmentStart:HH:mm} - {appointment.AppointmentEnd:HH:mm}"));
+            sp.Children.Add(CreateInfoTextBlock("📝 Причина", appointment.Purpose ?? "—"));
+            
+            // Статус (не для пациентов)
+            if (_role != "Пациент")
+            {
+                AddStatusInfo(sp, appointment);
+            }
+
+            // Кнопки управления
+            var btnPanel = CreateAppointmentButtons(appointment, isCompletedOrCancelled);
+            sp.Children.Add(btnPanel);
+
+            border.Child = sp;
+            return border;
+        }
+
+        /// <summary>
+        /// Возвращает высоту карточки в зависимости от роли.
+        /// </summary>
+        private double GetCardHeight()
+        {
+            return _role switch
+            {
+                "Администратор" => 300,
+                "Врач" => 310,
+                "Регистратор" => 220,
+                "Пациент" => 220,
+                _ => 260
+            };
+        }
+
+        /// <summary>
+        /// Добавляет информацию о враче/пациенте в зависимости от роли.
+        /// </summary>
+        private void AddRoleSpecificInfo(StackPanel sp, Appointment appointment)
+        {
+            if (_role == "Пациент")
+            {
+                sp.Children.Add(CreateInfoTextBlock("👨‍⚕️ Врач", 
+                    $"{appointment.Doctor?.User?.LastName} {appointment.Doctor?.User?.FirstName} {appointment.Doctor?.User?.MiddleName}"));
+            }
+            else if (_role == "Врач")
+            {
+                sp.Children.Add(CreateInfoTextBlock("👤 Пациент", 
+                    $"{appointment.Patient?.User?.LastName} {appointment.Patient?.User?.FirstName} {appointment.Patient?.User?.MiddleName}"));
+            }
+            else // Регистратор или Администратор
+            {
+                sp.Children.Add(CreateInfoTextBlock("👨‍⚕️ Врач", 
+                    $"{appointment.Doctor?.User?.LastName} {appointment.Doctor?.User?.FirstName}"));
+                sp.Children.Add(CreateInfoTextBlock("👤 Пациент", 
+                    $"{appointment.Patient?.User?.LastName} {appointment.Patient?.User?.FirstName}"));
+            }
+        }
+
+        /// <summary>
+        /// Добавляет информацию о статусе записи.
+        /// </summary>
+        private void AddStatusInfo(StackPanel sp, Appointment appointment)
+        {
+            var statusColor = GetStatusColor(appointment.Status ?? "Ожидает");
+            sp.Children.Add(new TextBlock
+            {
+                Text = $"Статус: {appointment.Status ?? "Ожидает"}",
+                FontSize = 11,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = statusColor,
+                Margin = new Thickness(0, 5, 0, 8)
+            });
+        }
+
+        /// <summary>
+        /// Создаёт панель кнопок для карточки записи.
+        /// </summary>
+        private WrapPanel CreateAppointmentButtons(Appointment appointment, bool isCompletedOrCancelled)
+        {
+            var btnPanel = new WrapPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 4, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+
+            switch (_role)
+            {
+                case "Пациент":
+                    AddPatientButtons(btnPanel, appointment, isCompletedOrCancelled);
+                    break;
+                case "Врач":
+                    AddDoctorButtons(btnPanel, appointment);
+                    break;
+                case "Администратор":
+                    AddAdminButtons(btnPanel, appointment);
+                    break;
+                // Регистратор - без кнопок
+            }
+
+            return btnPanel;
+        }
+
+        /// <summary>
+        /// Добавляет кнопки для пациента.
+        /// </summary>
+        private void AddPatientButtons(WrapPanel panel, Appointment appointment, bool isCompletedOrCancelled)
+        {
+            if (!isCompletedOrCancelled)
+            {
+                var moveBtn = CreateButton("🔄 Перенести", "MoveButtonStyle", () =>
+                {
+                    var win = new MoveAppointmentWindow(appointment.AppointmentId);
+                    if (win.ShowDialog() == true)
+                        LoadAppointments();
+                });
+
+                var cancelBtn = CreateButton("❌ Отменить", "CancelButtonStyle", () =>
+                {
+                    if (MessageBox.Show("Вы уверены, что хотите отменить запись?", 
+                        "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        UpdateAppointmentStatus(appointment.AppointmentId, "Отменено");
+                    }
+                });
+
+                panel.Children.Add(moveBtn);
+                panel.Children.Add(cancelBtn);
+            }
+            else
+            {
+                // Информационный текст для завершённых записей
+                panel.Children.Add(new TextBlock
+                {
+                    Text = appointment.Status == "Отменено" ? "❌ Запись отменена" : "✅ Запись выполнена",
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = appointment.Status == "Отменено" 
+                        ? new SolidColorBrush(Color.FromRgb(231, 76, 60))
+                        : new SolidColorBrush(Color.FromRgb(39, 174, 96)),
+                    Margin = new Thickness(0, 5, 0, 0),
+                    HorizontalAlignment = HorizontalAlignment.Center
+                });
+            }
+        }
+
+        /// <summary>
+        /// Добавляет кнопки для врача.
+        /// </summary>
+        private void AddDoctorButtons(WrapPanel panel, Appointment appointment)
+        {
+            bool isCompletedOrCancelled = appointment.Status == "Отменено" || appointment.Status == "Выполнено";
+
+            if (isCompletedOrCancelled)
+            {
+                // Для завершённых записей показываем только документы и статус
+                var docsBtn = CreateButton("📋 Документы", "ReportButtonStyle", () =>
+                {
+                    this.NavigationService?.Navigate(
+                        new MedicalRecordsPage(_userId, _role, appointment.PatientId));
+                });
+                panel.Children.Add(docsBtn);
+
+                // Показываем статус
+                panel.Children.Add(new TextBlock
+                {
+                    Text = appointment.Status == "Отменено" ? "❌ Отменено" : "✅ Выполнено",
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = appointment.Status == "Отменено" 
+                        ? new SolidColorBrush(Color.FromRgb(231, 76, 60))
+                        : new SolidColorBrush(Color.FromRgb(39, 174, 96)),
+                    Margin = new Thickness(8, 5, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+            }
+            else
+            {
+                // Для активных записей показываем все кнопки
+                var reportBtn = CreateButton("📄 Отчёт", "ReportButtonStyle", () =>
+                {
+                    this.NavigationService?.Navigate(
+                        new NewMedicalRecordPage(appointment.AppointmentId, appointment.PatientId, appointment.DoctorId));
+                });
+
+                var docsBtn = CreateButton("📋 Документы", "ReportButtonStyle", () =>
+                {
+                    this.NavigationService?.Navigate(
+                        new MedicalRecordsPage(_userId, _role, appointment.PatientId));
+                });
+
+                var repeatBtn = CreateButton("🔁 Повторный", "EditButtonStyle", () =>
+                {
+                    using var db = new MedRegistryContext();
+                    var doctor = db.Doctors.FirstOrDefault(d => d.UserId == _userId);
+                    if (doctor != null)
+                    {
+                        var repeatWindow = new RepeatAppointmentWindow(appointment.PatientId, doctor.DoctorId);
+                        if (repeatWindow.ShowDialog() == true)
+                            LoadAppointments();
+                    }
+                });
+
+                var doneBtn = CreateButton("✅ Выполнено", "DoneButtonStyle", () =>
+                {
+                    UpdateAppointmentStatus(appointment.AppointmentId, "Выполнено");
+                });
+
+                var cancelBtn = CreateButton("❌ Отменить", "CancelButtonStyle", () =>
+                {
+                    if (MessageBox.Show("Вы уверены, что хотите отменить приём?", 
+                        "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        UpdateAppointmentStatus(appointment.AppointmentId, "Отменено");
+                    }
+                });
+
+                panel.Children.Add(reportBtn);
+                panel.Children.Add(docsBtn);
+                panel.Children.Add(repeatBtn);
+                panel.Children.Add(doneBtn);
+                panel.Children.Add(cancelBtn);
+            }
+        }
+
+        /// <summary>
+        /// Добавляет кнопки для администратора.
+        /// </summary>
+        private void AddAdminButtons(WrapPanel panel, Appointment appointment)
+        {
+            var moveBtn = CreateButton("🔄 Перенести", "MoveButtonStyle", () =>
+            {
+                var win = new MoveAppointmentWindow(appointment.AppointmentId);
+                if (win.ShowDialog() == true)
+                    LoadAppointments();
+            });
+
+            var editBtn = CreateButton("✏️ Изменить", "EditButtonStyle", () =>
+            {
+                var editWindow = new EditAppointmentWindow(appointment.AppointmentId);
+                editWindow.ShowDialog();
+                LoadAppointments();
+            });
+
+            var cancelBtn = CreateButton("❌ Отменить", "CancelButtonStyle", () =>
+            {
+                if (MessageBox.Show("Вы уверены, что хотите отменить запись?", 
+                    "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    UpdateAppointmentStatus(appointment.AppointmentId, "Отменено");
+                }
+            });
+
+            var reportBtn = CreateButton("📄 Отчёт", "ReportButtonStyle", () =>
+            {
+                this.NavigationService?.Navigate(
+                    new NewMedicalRecordPage(appointment.AppointmentId, appointment.PatientId, appointment.DoctorId));
+            });
+
+            var doneBtn = CreateButton("✅ Выполнено", "DoneButtonStyle", () =>
+            {
+                UpdateAppointmentStatus(appointment.AppointmentId, "Выполнено");
+            });
+
+            panel.Children.Add(moveBtn);
+            panel.Children.Add(editBtn);
+            panel.Children.Add(cancelBtn);
+            panel.Children.Add(reportBtn);
+            panel.Children.Add(doneBtn);
+        }
+
+        /// <summary>
+        /// Создаёт кнопку с заданным стилем и обработчиком.
+        /// </summary>
+        private Button CreateButton(string content, string styleName, Action onClick)
+        {
+            var btn = new Button
+            {
+                Content = content,
+                Style = (Style)Application.Current.Resources[styleName]
+            };
+            btn.Click += (s, e) => onClick();
+            return btn;
+        }
+
+        /// <summary>
+        /// Создаёт текстовый блок с информацией.
+        /// </summary>
         private TextBlock CreateInfoTextBlock(string label, string value)
         {
             return new TextBlock
@@ -342,6 +476,9 @@ namespace MedRegistryApp.wpf.Pages
             };
         }
 
+        /// <summary>
+        /// Возвращает цвет для статуса записи.
+        /// </summary>
         private Brush GetStatusColor(string status)
         {
             return status switch
@@ -353,6 +490,9 @@ namespace MedRegistryApp.wpf.Pages
             };
         }
 
+        /// <summary>
+        /// Создаёт сообщение при отсутствии данных.
+        /// </summary>
         private UIElement CreateEmptyMessage(string text)
         {
             return new Border
@@ -370,18 +510,34 @@ namespace MedRegistryApp.wpf.Pages
             };
         }
 
+        /// <summary>
+        /// Обновляет статус записи в базе данных.
+        /// </summary>
+        /// <param name="appointmentId">ID записи</param>
+        /// <param name="status">Новый статус</param>
         private void UpdateAppointmentStatus(int appointmentId, string status)
         {
-            using var db = new MedRegistryContext();
-            var appointment = db.Appointments.Find(appointmentId);
-            if (appointment != null)
+            try
             {
-                appointment.Status = status;
-                db.SaveChanges();
-                LoadAppointments();
+                using var db = new MedRegistryContext();
+                var appointment = db.Appointments.Find(appointmentId);
+                if (appointment != null)
+                {
+                    appointment.Status = status;
+                    db.SaveChanges();
+                    LoadAppointments();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при обновлении статуса: {ex.Message}", 
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+        /// <summary>
+        /// Открывает окно создания новой записи на приём.
+        /// </summary>
         private void AddAppointment_Click(object sender, RoutedEventArgs e)
         {
             var newWindow = new NewAppointmentWindow(_userId);
@@ -391,27 +547,38 @@ namespace MedRegistryApp.wpf.Pages
             }
         }
 
+        /// <summary>
+        /// Показывает напоминания о предстоящих приёмах (в течение часа).
+        /// </summary>
         public void NotifyUpcomingAppointments()
         {
-            using var db = new MedRegistryContext();
-            var now = DateTime.Now;
-
-            var upcoming = db.Appointments
-                .Include(a => a.Patient).ThenInclude(p => p.User)
-                .Include(a => a.Doctor).ThenInclude(d => d.User)
-                .Where(a => a.AppointmentStart > now &&
-                            a.AppointmentStart <= now.AddHours(1) &&
-                            a.Status == "Ожидает")
-                .ToList();
-
-            foreach (var appt in upcoming)
+            try
             {
-                MessageBox.Show(
-                    $"Скоро приём:\nПациент: {appt.Patient?.User?.FirstName} {appt.Patient?.User?.LastName}\n" +
-                    $"Врач: {appt.Doctor?.User?.FirstName} {appt.Doctor?.User?.LastName}\n" +
-                    $"Время: {appt.AppointmentStart:HH:mm} - {appt.AppointmentEnd:HH:mm}",
-                    "Напоминание о приёме", MessageBoxButton.OK, MessageBoxImage.Information
-                );
+                using var db = new MedRegistryContext();
+                var now = DateTime.Now;
+
+                var upcoming = db.Appointments
+                    .Include(a => a.Patient).ThenInclude(p => p.User)
+                    .Include(a => a.Doctor).ThenInclude(d => d.User)
+                    .Where(a => a.AppointmentStart > now &&
+                                a.AppointmentStart <= now.AddHours(1) &&
+                                a.Status == "Ожидает")
+                    .ToList();
+
+                foreach (var appt in upcoming)
+                {
+                    MessageBox.Show(
+                        $"Скоро приём:\nПациент: {appt.Patient?.User?.FirstName} {appt.Patient?.User?.LastName}\n" +
+                        $"Врач: {appt.Doctor?.User?.FirstName} {appt.Doctor?.User?.LastName}\n" +
+                        $"Время: {appt.AppointmentStart:HH:mm} - {appt.AppointmentEnd:HH:mm}",
+                        "Напоминание о приёме", MessageBoxButton.OK, MessageBoxImage.Information
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                // Не показываем ошибку пользователю, просто логируем
+                System.Diagnostics.Debug.WriteLine($"Ошибка при проверке напоминаний: {ex.Message}");
             }
         }
     }

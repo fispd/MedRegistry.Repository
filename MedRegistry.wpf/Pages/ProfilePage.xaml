@@ -103,7 +103,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- Ближайший приём (только для пациентов) -->
+            <!-- Ближайший приём (для пациентов и врачей) -->
             <Border x:Name="NextAppointmentBorder" Background="White" CornerRadius="15" Padding="30" Margin="0,0,0,20"
                     BorderBrush="#E0E0E0" BorderThickness="1" Visibility="Collapsed">
                 <Border.Effect>
@@ -124,6 +124,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Text="Дата:" Grid.Row="0" Grid.Column="0" 
@@ -136,14 +137,21 @@
                         <TextBlock x:Name="NextApptTimeText" Grid.Row="1" Grid.Column="1" 
                                    FontSize="15" Margin="0,5" Foreground="#222" FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Врач:" Grid.Row="2" Grid.Column="0" 
+                        <!-- Для пациента - Врач, для врача - Пациент -->
+                        <TextBlock x:Name="NextApptPersonLabel" Text="Врач:" Grid.Row="2" Grid.Column="0" 
                                    FontWeight="Bold" FontSize="15" Margin="0,5" Foreground="#333"/>
-                        <TextBlock x:Name="NextApptDoctorText" Grid.Row="2" Grid.Column="1" 
+                        <TextBlock x:Name="NextApptPersonText" Grid.Row="2" Grid.Column="1" 
                                    FontSize="15" Margin="0,5" Foreground="#222" FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Кабинет:" Grid.Row="3" Grid.Column="0" 
+                        <!-- Причина визита (только для врача) -->
+                        <TextBlock x:Name="NextApptPurposeLabel" Text="Причина:" Grid.Row="3" Grid.Column="0" 
+                                   FontWeight="Bold" FontSize="15" Margin="0,5" Foreground="#333" Visibility="Collapsed"/>
+                        <TextBlock x:Name="NextApptPurposeText" Grid.Row="3" Grid.Column="1" 
+                                   FontSize="15" Margin="0,5" Foreground="#222" FontWeight="SemiBold" TextWrapping="Wrap" Visibility="Collapsed"/>
+
+                        <TextBlock x:Name="NextApptCabinetLabel" Text="Кабинет:" Grid.Row="4" Grid.Column="0" 
                                    FontWeight="Bold" FontSize="15" Margin="0,5" Foreground="#333"/>
-                        <TextBlock x:Name="NextApptCabinetText" Grid.Row="3" Grid.Column="1" 
+                        <TextBlock x:Name="NextApptCabinetText" Grid.Row="4" Grid.Column="1" 
                                    FontSize="15" Margin="0,5" Foreground="#222" FontWeight="SemiBold"/>
                     </Grid>
                     

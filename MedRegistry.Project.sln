@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedRegistry.wpf", "MedRegis
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{DA46E7A2-18DC-4F2E-AA2C-1F54F4E2F006}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedRegistry.webapi", "MedRegistry.webapi\MedRegistry.webapi.csproj", "{05D09E3D-EBCD-480C-8B83-959E7A324E1E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedRegistry.Tests", "MedRegistry.Tests\MedRegistry.Tests.csproj", "{9EC155C5-A770-FF2D-F5D6-4C480C92E81D}"
 EndProject
 Global
@@ -25,10 +23,6 @@ Global
 		{DA46E7A2-18DC-4F2E-AA2C-1F54F4E2F006}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA46E7A2-18DC-4F2E-AA2C-1F54F4E2F006}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA46E7A2-18DC-4F2E-AA2C-1F54F4E2F006}.Release|Any CPU.Build.0 = Release|Any CPU
-		{05D09E3D-EBCD-480C-8B83-959E7A324E1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{05D09E3D-EBCD-480C-8B83-959E7A324E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{05D09E3D-EBCD-480C-8B83-959E7A324E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{05D09E3D-EBCD-480C-8B83-959E7A324E1E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9EC155C5-A770-FF2D-F5D6-4C480C92E81D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9EC155C5-A770-FF2D-F5D6-4C480C92E81D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EC155C5-A770-FF2D-F5D6-4C480C92E81D}.Release|Any CPU.ActiveCfg = Release|Any CPU

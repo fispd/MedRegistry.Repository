@@ -1,6 +1,8 @@
 ﻿using DataLayer.Data;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -8,23 +10,47 @@ using System.Windows.Media;
 namespace MedRegistryApp.wpf.Pages
 {
     /// <summary>
-    /// Логика взаимодействия для ReportsPage.xaml
+    /// Страница отчётов и статистики.
+    /// Отображает общую статистику системы, статистику по врачам и приёмам.
     /// </summary>
     public partial class ReportsPage : Page
     {
         public ObservableCollection<DoctorStatsView> DoctorStats { get; set; } = new();
 
+        /// <summary>
+        /// Конструктор страницы отчётов.
+        /// </summary>
         public ReportsPage()
         {
             InitializeComponent();
             LoadData();
         }
 
+        /// <summary>
+        /// Загружает и отображает всю статистику.
+        /// </summary>
         private void LoadData()
         {
-            using var db = new MedRegistryContext();
+            try
+            {
+                using var db = new MedRegistryContext();
 
-            // Статистика врачей по специализациям
+                LoadDoctorStats(db);
+                LoadGeneralStats(db);
+                LoadAppointmentStats(db);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке статистики: {ex.Message}", 
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Загружает статистику врачей по специализациям.
+        /// </summary>
+        private void LoadDoctorStats(MedRegistryContext db)
+        {
             DoctorStats = new ObservableCollection<DoctorStatsView>(
                 db.Doctors.Include(d => d.Specialization)
                 .GroupBy(d => d.Specialization.Name)
@@ -36,8 +62,13 @@ namespace MedRegistryApp.wpf.Pages
             );
             
             DoctorStatsControl.ItemsSource = DoctorStats;
+        }
 
-            // Общая статистика
+        /// <summary>
+        /// Загружает общую статистику системы.
+        /// </summary>
+        private void LoadGeneralStats(MedRegistryContext db)
+        {
             var today = DateTime.Today;
             var totalDoctors = db.Doctors.Count();
             var totalPatients = db.Patients.Count();
@@ -49,8 +80,13 @@ namespace MedRegistryApp.wpf.Pages
             GeneralStatsPanel.Children.Add(CreateStatCard("👥", "Пациентов", totalPatients.ToString(), "#27AE60"));
             GeneralStatsPanel.Children.Add(CreateStatCard("📅", "Всего приёмов", totalAppointments.ToString(), "#9B59B6"));
             GeneralStatsPanel.Children.Add(CreateStatCard("📆", "Приёмов сегодня", appointmentsToday.ToString(), "#E67E22"));
+        }
 
-            // Статистика по статусам приёмов
+        /// <summary>
+        /// Загружает статистику по статусам приёмов.
+        /// </summary>
+        private void LoadAppointmentStats(MedRegistryContext db)
+        {
             var pending = db.Appointments.Count(a => a.Status == "Ожидает");
             var completed = db.Appointments.Count(a => a.Status == "Выполнено");
             var cancelled = db.Appointments.Count(a => a.Status == "Отменено");
@@ -61,6 +97,14 @@ namespace MedRegistryApp.wpf.Pages
             AppointmentStatsPanel.Children.Add(CreateStatCard("❌", "Отменено", cancelled.ToString(), "#E74C3C"));
         }
 
+        /// <summary>
+        /// Создаёт карточку статистики с иконкой и числовым значением.
+        /// </summary>
+        /// <param name="icon">Иконка (эмодзи)</param>
+        /// <param name="title">Заголовок карточки</param>
+        /// <param name="value">Числовое значение</param>
+        /// <param name="color">Цвет фона в формате HEX</param>
+        /// <returns>Border элемент карточки</returns>
         private Border CreateStatCard(string icon, string title, string value, string color)
         {
             var border = new Border
@@ -105,6 +149,9 @@ namespace MedRegistryApp.wpf.Pages
         }
     }
 
+    /// <summary>
+    /// Модель представления для статистики врачей по специализациям.
+    /// </summary>
     public class DoctorStatsView
     {
         public string Specialization { get; set; } = "";

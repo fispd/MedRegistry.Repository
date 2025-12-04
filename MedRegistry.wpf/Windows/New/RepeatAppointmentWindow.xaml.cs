@@ -13,7 +13,6 @@ namespace MedRegistryApp.wpf.Windows.New
     {
         private readonly int _patientId;
         private readonly int _doctorId;
-        private readonly string _patientName;
 
         public RepeatAppointmentWindow(int patientId, int doctorId)
         {
