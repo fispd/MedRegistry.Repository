@@ -576,9 +576,8 @@ namespace MedRegistryApp.wpf.Pages
             worksheet.Cell(1, 5).Value = "Дата работы (дд.мм.гггг)";
             worksheet.Cell(1, 6).Value = "Время начала (чч:мм)";
             worksheet.Cell(1, 7).Value = "Время окончания (чч:мм)";
-            worksheet.Cell(1, 8).Value = "Доступен (да/нет)";
 
-            var headerRange = worksheet.Range(1, 1, 1, 8);
+            var headerRange = worksheet.Range(1, 1, 1, 7);
             headerRange.Style.Font.Bold = true;
             headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
             headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
@@ -625,9 +624,8 @@ namespace MedRegistryApp.wpf.Pages
             worksheet.Cell(2, 5).Value = DateTime.Now.AddDays(1).ToString("dd.MM.yyyy");
             worksheet.Cell(2, 6).Value = "09:00";
             worksheet.Cell(2, 7).Value = "17:00";
-            worksheet.Cell(2, 8).Value = "да";
 
-            var exampleRange = worksheet.Range(2, 1, 2, 8);
+            var exampleRange = worksheet.Range(2, 1, 2, 7);
             exampleRange.Style.Fill.BackgroundColor = XLColor.LightYellow;
         }
 
@@ -645,8 +643,7 @@ namespace MedRegistryApp.wpf.Pages
             sheet.Cell(5, 1).Value = "3. Столбцы 'ФИО врача', 'Специализация', 'Кабинет' - для справки (можно оставить пустыми)";
             sheet.Cell(6, 1).Value = "4. Дата работы: формат дд.мм.гггг (например: 25.12.2025)";
             sheet.Cell(7, 1).Value = "5. Время начала и окончания: формат чч:мм (например: 09:00, 17:30)";
-            sheet.Cell(8, 1).Value = "6. Доступен: введите 'да' или 'нет'";
-            sheet.Cell(9, 1).Value = "7. Желтая строка - это пример, её можно удалить или изменить";
+            sheet.Cell(8, 1).Value = "6. Желтая строка - это пример, её можно удалить или изменить";
         }
 
         /// <summary>
@@ -771,16 +768,13 @@ namespace MedRegistryApp.wpf.Pages
                 if (importedSchedules.Any(s => s.DoctorId == doctorId && s.WorkDate == scheduleWorkDate))
                     return (null, null, $"Строка {row}: Дубликат в файле - {doctorName} на {scheduleWorkDate:dd.MM.yyyy}");
 
-                var availableStr = worksheet.Cell(row, 8).GetString().Trim().ToLower();
-                bool isAvailable = availableStr == "да" || availableStr == "yes" || availableStr == "1" || availableStr == "true";
-
                 return (new Schedule
                 {
                     DoctorId = doctorId,
                     WorkDate = scheduleWorkDate,
                     StartTime = startDateTime,
                     EndTime = endDateTime,
-                    IsAvailable = isAvailable
+                    IsAvailable = true
                 }, null, null);
             }
             catch (Exception ex)

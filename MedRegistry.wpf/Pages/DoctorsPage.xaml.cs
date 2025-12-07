@@ -41,12 +41,12 @@ namespace MedRegistryApp.wpf.Pages
 
         /// <summary>
         /// Настраивает видимость кнопки добавления врача.
-        /// Доступна только администраторам.
+        /// Доступна администраторам и регистраторам.
         /// </summary>
         private void ConfigureButtonVisibility()
         {
             var addButton = this.FindName("AddDoctorButton") as Button;
-            if (addButton != null && _role != "Администратор")
+            if (addButton != null && _role != "Администратор" && _role != "Регистратор")
             {
                 addButton.Visibility = Visibility.Collapsed;
             }
@@ -246,8 +246,8 @@ namespace MedRegistryApp.wpf.Pages
                 Margin = new Thickness(0, 5, 0, 0)
             };
 
-            // Кнопки редактирования/удаления только для администратора
-            if (_role == "Администратор")
+            // Кнопки редактирования/удаления для администратора и регистратора
+            if (_role == "Администратор" || _role == "Регистратор")
             {
                 var editBtn = new Button
                 {
